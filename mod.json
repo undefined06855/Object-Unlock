@@ -1,0 +1,24 @@
+{
+    "geode": "4.8.0",
+    "gd": {
+        "win": "2.2074",
+        "android": "2.2074",
+        "mac": "2.2074",
+        "ios": "2.2074"
+    },
+
+    "version": "v1.0.0",
+    "id": "undefined0.object_unlock",
+    "name": "Object Unlock",
+    "developer": "undefined0",
+    "description": "",
+    "tags": [],
+
+    "dependencies": {
+        "alphalaneous.object_popup_api": "v1.0.6"
+    },
+
+    "links": {
+        "source": "https://github.com/undefined06855/example-mod"
+    }
+}
