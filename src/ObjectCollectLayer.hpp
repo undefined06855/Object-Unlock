@@ -2,8 +2,8 @@
 
 class ObjectCollectLayer : public cocos2d::CCLayer {
 public:
-    static ObjectCollectLayer* create();
-    bool init();
+    static ObjectCollectLayer* create(bool skipDelay = false);
+    bool init(bool skipDelay);
 
     cocos2d::CCLayerColor* m_bg;
     cocos2d::CCNodeRGBA* m_clipContent;

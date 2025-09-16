@@ -21,4 +21,7 @@ class $modify(HookedPlayLayer, PlayLayer) {
     void playPlatformerEndAnimationToPos(cocos2d::CCPoint pos, bool instant);
 
     void fullReset();
+
+    void sharedInit(bool skipDelay = false);
+    void potentiallyAddObject(GameObject* object, bool skipTouchChecks = false);
 };

@@ -9,13 +9,7 @@ HookedPlayLayer::Fields::Fields()
 bool HookedPlayLayer::init(GJGameLevel* level, bool useReplay, bool dontCreateObjects) {
     if (!PlayLayer::init(level, useReplay, dontCreateObjects)) return false;
 
-    if (m_player1)               reinterpret_cast<HookedGameObject*>(m_player1)->m_fields->m_seen = true;
-    if (m_player1CollisionBlock) reinterpret_cast<HookedGameObject*>(m_player1CollisionBlock)->m_fields->m_seen = true;
-    if (m_player2)               reinterpret_cast<HookedGameObject*>(m_player2)->m_fields->m_seen = true;
-    if (m_player2CollisionBlock) reinterpret_cast<HookedGameObject*>(m_player2CollisionBlock)->m_fields->m_seen = true;
-    if (m_anticheatSpike)        reinterpret_cast<HookedGameObject*>(m_anticheatSpike)->m_fields->m_seen = true;
-
-    m_fields->m_overlayLayer = ObjectCollectLayer::create();
+    sharedInit();
 
     return true;
 }
@@ -44,21 +38,9 @@ void HookedPlayLayer::updateVisibility(float dt) {
     // m_activeObjectsIndex == m_activeObjects.size() (max size of m_activeObjects)
     // (rob doesnt believe in std::vector::max_size i guess)
     
-    // TODO: maybe make it so its only the objects you touch?
-
     for (unsigned int i = 0; i < m_activeObjectsCount; i++) {
         auto object = static_cast<HookedGameObject*>(m_activeObjects[i]);
-        auto objectFields = object->m_fields.self();
-
-        if (objectFields->m_seen) continue;
-        objectFields->m_seen = true;
-
-        if (std::find(fields->m_objectIDsSeen.begin(), fields->m_objectIDsSeen.end(), object->m_objectID) != fields->m_objectIDsSeen.end()) continue;
-
-        bool isValidObject = fields->m_overlayLayer->addObject(object->m_objectID);
-        if (isValidObject) {
-            fields->m_objectIDsSeen.push_back(object->m_objectID);
-        }
+        potentiallyAddObject(object);
     }
 }
 
@@ -75,13 +57,45 @@ void HookedPlayLayer::playPlatformerEndAnimationToPos(cocos2d::CCPoint pos, bool
 void HookedPlayLayer::fullReset() {
     PlayLayer::fullReset();
 
-    if (m_player1)               reinterpret_cast<HookedGameObject*>(m_player1)->m_fields->m_seen = true;
-    if (m_player1CollisionBlock) reinterpret_cast<HookedGameObject*>(m_player1CollisionBlock)->m_fields->m_seen = true;
-    if (m_player2)               reinterpret_cast<HookedGameObject*>(m_player2)->m_fields->m_seen = true;
-    if (m_player2CollisionBlock) reinterpret_cast<HookedGameObject*>(m_player2CollisionBlock)->m_fields->m_seen = true;
-    if (m_anticheatSpike)        reinterpret_cast<HookedGameObject*>(m_anticheatSpike)->m_fields->m_seen = true;
+    sharedInit(/* skip delay */ true);
 
     auto fields = m_fields.self();
-    fields->m_overlayLayer = ObjectCollectLayer::create();
     cocos2d::CCScene::get()->addChild(fields->m_overlayLayer, 10);
+}
+
+void HookedPlayLayer::sharedInit(bool skipDelay) {
+    if (m_player1)               reinterpret_cast<HookedGameObject*>(m_player1)->m_fields->m_ignore = true;
+    if (m_player1CollisionBlock) reinterpret_cast<HookedGameObject*>(m_player1CollisionBlock)->m_fields->m_ignore = true;
+    if (m_player2)               reinterpret_cast<HookedGameObject*>(m_player2)->m_fields->m_ignore = true;
+    if (m_player2CollisionBlock) reinterpret_cast<HookedGameObject*>(m_player2CollisionBlock)->m_fields->m_ignore = true;
+    if (m_anticheatSpike)        reinterpret_cast<HookedGameObject*>(m_anticheatSpike)->m_fields->m_ignore = true;
+
+    m_fields->m_overlayLayer = ObjectCollectLayer::create(skipDelay);
+}
+
+void HookedPlayLayer::potentiallyAddObject(GameObject* object, bool skipTouchChecks) {
+    auto fields = m_fields.self();
+    auto cast = static_cast<HookedGameObject*>(object);
+    auto objectFields = cast->m_fields.self();
+
+    if (objectFields->m_ignore) return;
+
+    if (std::find(fields->m_objectIDsSeen.begin(), fields->m_objectIDsSeen.end(), object->m_objectID) != fields->m_objectIDsSeen.end()) {
+        // already seen an object id, dont calculate
+        return;
+    }
+
+    if (!skipTouchChecks) {
+        auto obb2d = cast->getOrientedBox();
+        if (!obb2d) return;
+    
+        if (!obb2d->overlaps(m_player1->getOrientedBox())) {
+            return;
+        }
+    }
+
+    bool isValidObject = fields->m_overlayLayer->addObject(object->m_objectID);
+    if (isValidObject) {
+        fields->m_objectIDsSeen.push_back(object->m_objectID);
+    }
 }

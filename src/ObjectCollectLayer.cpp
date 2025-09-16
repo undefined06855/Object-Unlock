@@ -1,9 +1,9 @@
 #include "ObjectCollectLayer.hpp"
 #include "hooks/GameObject.hpp"
 
-ObjectCollectLayer* ObjectCollectLayer::create() {
+ObjectCollectLayer* ObjectCollectLayer::create(bool skipDelay) {
     auto ret = new ObjectCollectLayer;
-    if (ret->init()) {
+    if (ret->init(skipDelay)) {
         ret->autorelease();
         return ret;
     }
@@ -16,7 +16,7 @@ static constexpr auto bgHeight = 23.f;
 static constexpr auto clipPad = 3.f;
 static constexpr auto clipHeight = bgHeight - clipPad*2.f;
 
-bool ObjectCollectLayer::init() {
+bool ObjectCollectLayer::init(bool skipDelay) {
     if (!CCLayer::init()) return false;
     setID("ObjectCollectLayer"_spr);
     setAnchorPoint({ 0.f, 0.f });
@@ -47,7 +47,7 @@ bool ObjectCollectLayer::init() {
     m_bg->setScaleX(0.f);
     m_bg->setPositionY(m_bg->getPositionY() + 100.f);
     m_bg->runAction(cocos2d::CCSequence::createWithTwoActions(
-        cocos2d::CCDelayTime::create(1.f),
+        cocos2d::CCDelayTime::create(skipDelay ? .2f : 1.f),
         cocos2d::CCSpawn::create(
             cocos2d::CCEaseExponentialOut::create(cocos2d::CCScaleTo::create(.5f, 1.f)),
             cocos2d::CCEaseExponentialOut::create(cocos2d::CCMoveBy::create(.5f, { 0.f, -100.f })),
@@ -100,7 +100,7 @@ bool ObjectCollectLayer::addObject(int objectID) {
     m_clipContent->addChild(wrapper);
 
     // pad so that it isnt squished against the left of the container
-    // this doubles the amount of nodes to calculate (obviously) but idc imo
+    // this doubles the amount of nodes to calculate but whatever
     auto padLeft = cocos2d::CCNode::create();
     padLeft->setContentSize({ 9.f, clipHeight });
     m_clipContent->addChild(padLeft);
@@ -138,5 +138,5 @@ void ObjectCollectLayer::animateAway() {
 
     m_bg->runAction(static_cast<cocos2d::CCAction*>(fadeSequence->copy()));
     m_clipContent->runAction(static_cast<cocos2d::CCAction*>(fadeSequence->copy()));
-    runAction(sequence);
+    this->runAction(sequence);
 }

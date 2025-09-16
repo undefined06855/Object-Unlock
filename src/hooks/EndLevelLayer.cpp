@@ -37,13 +37,15 @@ void HookedEndLevelLayer::customSetup() {
         clipContent->getParent()->setPositionY(107.f);
         clipContent->setScale(.2f);
     
-        auto objectNames = ObjectNames::get();
-
         for (auto objectID : playLayerFields->m_objectIDsSeen) {
-            auto label = cocos2d::CCLabelBMFont::create(objectNames->nameForID(objectID).c_str(), "bigFont.fnt");
-
+            auto label = cocos2d::CCLabelBMFont::create(ObjectNames::get()->nameForID(objectID).c_str(), "bigFont.fnt");
             label->setScale(60.f / label->getContentHeight());
+            clipContent->addChild(label);
+        }
 
+        if (playLayerFields->m_objectIDsSeen.empty()) {
+            auto label = cocos2d::CCLabelBMFont::create("no new objects unlocked...", "bigFont.fnt");
+            label->setScale(60.f / label->getContentHeight());
             clipContent->addChild(label);
         }
 
@@ -99,7 +101,7 @@ void HookedEndLevelLayer::runActionOnClipContent(cocos2d::CCNodeRGBA* clipConten
     auto parentWidth = clipContent->getParent()->getScaledContentWidth();
     auto movementAmountNeeded = std::max(0.f, contentWidth - parentWidth);
     auto speed = 50.f; // cocos units per second?
-    auto movementLength = movementAmountNeeded / speed;
+    auto movementLength = movementAmountNeeded / speed; // time = distance ÷ speed
 
     if (direction == ClipContentDirection::Right) movementAmountNeeded *= -1.f;
 
@@ -121,6 +123,7 @@ void HookedEndLevelLayer::runActionOnClipContent(cocos2d::CCNodeRGBA* clipConten
     
     if (movementAmountNeeded != 0.f) {
         if (direction == ClipContentDirection::Right) {
+            // i dont remember why this worked to be honest do the maths in your head
             clipContent->setPositionX(-clipContent->getScaledContentWidth() - initialAnimMovement + parentWidth);
             initialAnimMovement *= -1.f;
         } else {
@@ -140,7 +143,7 @@ void HookedEndLevelLayer::runActionOnClipContent(cocos2d::CCNodeRGBA* clipConten
                 cocos2d::CCFadeTo::create(.5f, endOpacity),
                 cocos2d::CCEaseExponentialOut::create(cocos2d::CCMoveBy::create(1.f, { -initialAnimMovement, 0.f }))
             ),
-            // "hack" to start this slightly earlier for a smoother transition
+            // start this slightly earlier for a smoother transition
             cocos2d::CCSpawn::createWithTwoActions(
                 cocos2d::CCDelayTime::create(.97f),
                 shuffleAction
