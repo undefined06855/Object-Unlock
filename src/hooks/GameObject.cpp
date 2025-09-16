@@ -47,7 +47,7 @@ GameObject* HookedGameObject::createGameObject(int id) {
     valuesExist[1] = gjbgl;
 
     // copy :(
-    auto gdVectorValues = gd::vector(values);
+    auto gdVectorValues = gd::vector<gd::string>(values);
     auto gdVectorValuesExist = gd::vector(valuesExist);
 
     auto object = GameObject::objectFromVector(gdVectorValues, gdVectorValuesExist, gjbgl, false);
