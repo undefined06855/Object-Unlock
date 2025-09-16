@@ -38,8 +38,8 @@ GameObject* HookedGameObject::createGameObject(int id) {
 
     // gameobject createWithKey isnt the most consistent function
     // since they are passed as references they must be gd:: and not std:: 
-    gd::vector<gd::string> values = {};
-    gd::vector<void*> valuesExist = {};
+    gd::vector<gd::string> values;
+    gd::vector<void*> valuesExist;
     values.resize(600, "");
     valuesExist.resize(600, 0x0);
 
