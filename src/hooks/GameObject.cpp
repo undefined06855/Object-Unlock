@@ -46,9 +46,13 @@ GameObject* HookedGameObject::createGameObject(int id) {
     values[1] = fmt::to_string(id);
     valuesExist[1] = gjbgl;
 
-    // copy :(
-    auto gdVectorValues = gd::vector<gd::string>(values);
-    auto gdVectorValuesExist = gd::vector(valuesExist);
+    // this code makes me sad
+    // .resize doesnt work
+    gd::vector<gd::string> gdVectorValues;
+    gdVectorValues.reserve(600);
+    for (int i = 0; i < 600; i++) { gdVectorValues.push_back(values[i]); }
+
+    gd::vector<void*> gdVectorValuesExist = valuesExist;
 
     auto object = GameObject::objectFromVector(gdVectorValues, gdVectorValuesExist, gjbgl, false);
     if (!object) return nullptr;
