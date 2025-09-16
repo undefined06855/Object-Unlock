@@ -38,15 +38,19 @@ GameObject* HookedGameObject::createGameObject(int id) {
 
     // gameobject createWithKey isnt the most consistent function
     // since they are passed as references they must be gd:: and not std:: 
-    gd::vector<gd::string> values;
-    gd::vector<void*> valuesExist;
+    std::vector<std::string> values = {};
+    std::vector<void*> valuesExist = {};
     values.resize(600, "");
     valuesExist.resize(600, 0x0);
 
     values[1] = fmt::to_string(id);
     valuesExist[1] = gjbgl;
 
-    auto object = GameObject::objectFromVector(values, valuesExist, gjbgl, false);
+    // copy :(
+    auto gdVectorValues = gd::vector(values);
+    auto gdVectorValuesExist = gd::vector(valuesExist);
+
+    auto object = GameObject::objectFromVector(gdVectorValues, gdVectorValuesExist, gjbgl, false);
     if (!object) return nullptr;
     
     // set up some stuff for animated objects
