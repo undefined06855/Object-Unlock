@@ -1,5 +1,6 @@
 #include "PlayLayer.hpp"
 #include "GameObject.hpp"
+#include "../UnlockManager.hpp"
 
 HookedPlayLayer::Fields::Fields()
     : m_objectIDsSeen({})
@@ -17,8 +18,10 @@ bool HookedPlayLayer::init(GJGameLevel* level, bool useReplay, bool dontCreateOb
 cocos2d::CCScene* HookedPlayLayer::scene(GJGameLevel* level, bool useReplay, bool dontCreateObjects) {
     auto ret = PlayLayer::scene(level, useReplay, dontCreateObjects);
 
-    auto playLayer = ret->getChildByIndex(0);
-    ret->addChild(static_cast<HookedPlayLayer*>(playLayer)->m_fields->m_overlayLayer, 10);
+    if (UnlockManager::get().isInRun()) {
+        auto playLayer = ret->getChildByIndex(0);
+        ret->addChild(static_cast<HookedPlayLayer*>(playLayer)->m_fields->m_overlayLayer, 10);
+    }
 
     return ret;
 }
@@ -30,9 +33,11 @@ void HookedPlayLayer::startGame() {
 
 void HookedPlayLayer::updateVisibility(float dt) {
     PlayLayer::updateVisibility(dt);
+
+    if (!UnlockManager::get().isInRun()) return;
     
     auto fields = m_fields.self();
-    if (!fields->m_started) return;
+    if (!fields->m_started) return; // whether we're in the 1 second wait or not
 
     // m_activeObjectsCount != m_activeObjects.size()
     // m_activeObjectsIndex == m_activeObjects.size() (max size of m_activeObjects)
@@ -46,16 +51,18 @@ void HookedPlayLayer::updateVisibility(float dt) {
 
 void HookedPlayLayer::playEndAnimationToPos(cocos2d::CCPoint pos) {
     PlayLayer::playEndAnimationToPos(pos);
-    m_fields->m_overlayLayer->animateAway();
+    sharedEnd();
 }
 
 void HookedPlayLayer::playPlatformerEndAnimationToPos(cocos2d::CCPoint pos, bool instant) {
     PlayLayer::playPlatformerEndAnimationToPos(pos, instant);
-    m_fields->m_overlayLayer->animateAway();
+    sharedEnd();
 }
 
 void HookedPlayLayer::fullReset() {
     PlayLayer::fullReset();
+
+    if (!UnlockManager::get().isInRun()) return;
 
     sharedInit(/* skip delay */ true);
 
@@ -63,7 +70,24 @@ void HookedPlayLayer::fullReset() {
     cocos2d::CCScene::get()->addChild(fields->m_overlayLayer, 10);
 }
 
+void HookedPlayLayer::onQuit() {
+    PlayLayer::onQuit();
+    sharedEnd();
+}
+
+void HookedPlayLayer::sharedEnd() {
+    if (!UnlockManager::get().isInRun()) return;
+    auto fields = m_fields.self();
+
+    auto& unlockedObjectIDs = UnlockManager::get().m_runState.m_unlockedObjectIDs;
+    unlockedObjectIDs.insert(unlockedObjectIDs.end(), fields->m_objectIDsSeen.begin(), fields->m_objectIDsSeen.end());
+    
+    fields->m_overlayLayer->animateAway();
+}
+
 void HookedPlayLayer::sharedInit(bool skipDelay) {
+    if (!UnlockManager::get().isInRun()) return;
+
     if (m_player1)               reinterpret_cast<HookedGameObject*>(m_player1)->m_fields->m_ignore = true;
     if (m_player1CollisionBlock) reinterpret_cast<HookedGameObject*>(m_player1CollisionBlock)->m_fields->m_ignore = true;
     if (m_player2)               reinterpret_cast<HookedGameObject*>(m_player2)->m_fields->m_ignore = true;
