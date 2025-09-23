@@ -98,6 +98,8 @@ void HookedPlayLayer::sharedInit(bool skipDelay) {
 }
 
 void HookedPlayLayer::potentiallyAddObject(GameObject* object, bool skipTouchChecks) {
+    if (!UnlockManager::get().isInRun()) return;
+
     auto fields = m_fields.self();
     auto cast = static_cast<HookedGameObject*>(object);
     auto objectFields = cast->m_fields.self();

@@ -1,4 +1,5 @@
 #pragma once
+#include <RenderTexture.hpp>
 
 /*
  * Gradient Clipping Node - a ccclippingnode that allows half transparent clip
@@ -8,15 +9,22 @@
  * Relies on undefined06855/gd-render-texture
  */
 
-class GradientClippingNode : public cocos2d::CCNode {
+extern const char* g_clipShaderVertex;
+extern const char* g_clipShaderFragment;
+extern cocos2d::CCGLProgram* g_clipShader;
+
+class GradientClippingNode : public cocos2d::CCLayerColor {
     GradientClippingNode();
+    
+    std::shared_ptr<RenderTexture::Sprite> m_clip;
+    std::shared_ptr<RenderTexture::Sprite> m_contents;
+    bool m_drawingForPreview;
+
 public:
     static GradientClippingNode* create(cocos2d::CCNode* clip);
     bool init(cocos2d::CCNode* clip);
 
-    cocos2d::CCNode* m_clipNode;
-    cocos2d::CCSprite* m_clip;
-    cocos2d::CCSprite* m_contents;
+    geode::Ref<cocos2d::CCNode> m_clipNode;
 
     void rerender();
 

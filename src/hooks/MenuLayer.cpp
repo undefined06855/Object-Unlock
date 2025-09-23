@@ -5,6 +5,6 @@
 
 void HookedMenuLayer::onMoreGames(cocos2d::CCObject* sender) {
     UnlockManager::get().startRun({
-        .m_length = std::chrono::minutes(2)
+        .m_length = std::chrono::minutes(0)
     });
 }

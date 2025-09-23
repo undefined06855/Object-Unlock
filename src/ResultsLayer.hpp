@@ -5,4 +5,7 @@ public:
     static cocos2d::CCScene* scene();
     static ResultsLayer* create();
     bool init();
+
+    void keyBackClicked();
+    void onEnterTransitionDidFinish();
 };

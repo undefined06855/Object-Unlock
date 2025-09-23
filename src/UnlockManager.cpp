@@ -1,4 +1,5 @@
 #include "UnlockManager.hpp"
+#include "cocos/ShakeAction.hpp"
 
 UnlockManager::UnlockManager()
     : m_state(ObjectUnlockState::None)
@@ -49,16 +50,14 @@ void UnlockManager::endRun() {
 
     m_blockTouches = true;
 
-    PauseLayer* pauseLayer = nullptr;
-
     if (auto pl = PlayLayer::get()) {
         pl->pauseGame(true);
-        pauseLayer = cocos2d::CCScene::get()->getChildByType<PauseLayer>(0);
+        auto pauseLayer = cocos2d::CCScene::get()->getChildByType<PauseLayer>(0);
+        pauseLayer->setVisible(false);
     }
 
     geode::SceneManager::get()->forget(m_label);
     m_label->removeFromParent();
-    m_label = nullptr;
 
     // easier to completely recreate the label
     m_label = cocos2d::CCLabelBMFont::create("Game Over!", "bigFont.fnt");
@@ -84,8 +83,11 @@ void UnlockManager::endRun() {
             cocos2d::CCEaseSineIn::create(cocos2d::CCScaleTo::create(.5f, 1.3f)),
             nullptr
         ),
-        cocos2d::CCDelayTime::create(2.f),
-        geode::cocos::CallFuncExt::create([pauseLayer] {
+        geode::cocos::CallFuncExt::create([] {
+            cocos2d::CCScene::get()->runAction(ShakeAction::create(1.f, 7.f));
+        }),
+        cocos2d::CCDelayTime::create(3.f),
+        geode::cocos::CallFuncExt::create([] {
             auto gameManager = GameManager::get();
             gameManager->m_sceneEnum = -8008135; // check gamemanager hooks
 
@@ -143,22 +145,27 @@ void UnlockManager::update(float dt) {
         m_label->runAction(cocos2d::CCSpawn::createWithTwoActions(
             cocos2d::CCSequence::createWithTwoActions(
                 // scaling effect
-                cocos2d::CCEaseExponentialOut::create(cocos2d::CCScaleBy::create(.75f, 1.5f)),
-                cocos2d::CCEaseExponentialIn::create(cocos2d::CCScaleBy::create(.75f, 1.f / 1.5f))
+                cocos2d::CCEaseExponentialOut::create(cocos2d::CCScaleBy::create(.375f, 1.5f)),
+                cocos2d::CCEaseExponentialIn::create(cocos2d::CCScaleBy::create(.375f, 1.f / 1.5f))
             ),
             cocos2d::CCSequence::create(
                 // left/right rotate wobble effect
-                cocos2d::CCRotateTo::create(.3f, -20.f),
-                cocos2d::CCRotateTo::create(.3f, 20.f),
-                cocos2d::CCRotateTo::create(.3f, -20.f),
-                cocos2d::CCRotateTo::create(.3f, 20.f),
-                cocos2d::CCRotateTo::create(.3f, 0.f),
+                cocos2d::CCRotateTo::create(.15f, -20.f),
+                cocos2d::CCRotateTo::create(.15f, 20.f),
+                cocos2d::CCRotateTo::create(.15f, -20.f),
+                cocos2d::CCRotateTo::create(.15f, 20.f),
+                cocos2d::CCRotateTo::create(.15f, 0.f),
                 nullptr
             )
         ));
     }
 
     m_label->setString(formatString.c_str());
+    
+    auto highestZOrder = cocos2d::CCScene::get()->getHighestChildZ();
+    if (highestZOrder != INT_MAX) { // mods better not be doing this in 2025
+        m_label->setZOrder(highestZOrder + 1);
+    }
 }
 
 $on_mod(Loaded) {
