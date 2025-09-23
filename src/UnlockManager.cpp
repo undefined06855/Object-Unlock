@@ -53,7 +53,7 @@ void UnlockManager::endRun() {
     if (auto pl = PlayLayer::get()) {
         pl->pauseGame(true);
         auto pauseLayer = cocos2d::CCScene::get()->getChildByType<PauseLayer>(0);
-        pauseLayer->setVisible(false);
+        if (pauseLayer) pauseLayer->setVisible(false);
     }
 
     geode::SceneManager::get()->forget(m_label);
@@ -70,11 +70,8 @@ void UnlockManager::endRun() {
     cocos2d::CCScene::get()->addChild(m_label);
 
     // animation borrowed from minesweeperplus
-    // go play it https://minesweeper.undefined0.dev/
-    // (you can make your own custom tiles with javascript!)
-    
     // https://minesweeper.undefined0.dev/class/screen/Title.js (ctrl+f "// title")
-    // immediate mode ui so need to refactor for cocos rm ui
+    // immediate mode style ui so need to refactor for cocos rm ui
     m_label->runAction(cocos2d::CCSequence::create(
         cocos2d::CCSpawn::create(
             cocos2d::CCFadeIn::create(.3f),
@@ -126,7 +123,7 @@ void UnlockManager::update(float dt) {
     std::string formatString;
 
     if (minutes == 0) {
-        formatString = fmt::format("{:02}", seconds);
+        formatString = fmt::format("{}", seconds);
     } else {
         formatString = fmt::format("{}:{:02}", minutes, seconds);
     }

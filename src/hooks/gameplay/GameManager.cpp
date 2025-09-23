@@ -1,5 +1,5 @@
 #include "GameManager.hpp"
-#include "../ResultsLayer.hpp"
+#include "../../ResultsLayer.hpp"
 
 void HookedGameManager::returnToLastScene(GJGameLevel* level) {
     if (m_sceneEnum == -8008135) {
@@ -8,7 +8,7 @@ void HookedGameManager::returnToLastScene(GJGameLevel* level) {
         // so pressing back on resultslayer goes to your levels
 
         auto director = cocos2d::CCDirector::get();
-        director->popToRootScene(); // remove all except last scene
+        director->popToSceneStackLevel(1); // remove all except last scene
 
         // clean up this current last scene
         auto lastScene = static_cast<cocos2d::CCScene*>(director->m_pobScenesStack->lastObject());

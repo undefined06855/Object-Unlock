@@ -3,6 +3,8 @@
 HookedGameObject::Fields::Fields()
     : m_ignore(false) {}
 
+// TODO: gameplay blocks (h blocks etc) with cclabelbmfont
+
 // default colours for channels in a default level
 // mostly just used for white/black
 cocos2d::ccColor3B HookedGameObject::colorForChannel(int channel) {

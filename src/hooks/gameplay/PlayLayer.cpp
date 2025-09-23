@@ -1,11 +1,12 @@
 #include "PlayLayer.hpp"
 #include "GameObject.hpp"
-#include "../UnlockManager.hpp"
+#include "../../UnlockManager.hpp"
 
 HookedPlayLayer::Fields::Fields()
     : m_objectIDsSeen({})
     , m_overlayLayer(nullptr)
-    , m_started(false) {}
+    , m_started(false)
+    , m_finished(false) {}
 
 bool HookedPlayLayer::init(GJGameLevel* level, bool useReplay, bool dontCreateObjects) {
     if (!PlayLayer::init(level, useReplay, dontCreateObjects)) return false;
@@ -79,6 +80,9 @@ void HookedPlayLayer::sharedEnd() {
     if (!UnlockManager::get().isInRun()) return;
     auto fields = m_fields.self();
 
+    if (fields->m_finished) return;
+    fields->m_finished = true;
+
     auto& unlockedObjectIDs = UnlockManager::get().m_runState.m_unlockedObjectIDs;
     unlockedObjectIDs.insert(unlockedObjectIDs.end(), fields->m_objectIDsSeen.begin(), fields->m_objectIDsSeen.end());
     
@@ -87,6 +91,10 @@ void HookedPlayLayer::sharedEnd() {
 
 void HookedPlayLayer::sharedInit(bool skipDelay) {
     if (!UnlockManager::get().isInRun()) return;
+    
+    auto fields = m_fields.self();
+    
+    fields->m_finished = false;
 
     if (m_player1)               reinterpret_cast<HookedGameObject*>(m_player1)->m_fields->m_ignore = true;
     if (m_player1CollisionBlock) reinterpret_cast<HookedGameObject*>(m_player1CollisionBlock)->m_fields->m_ignore = true;
@@ -94,7 +102,7 @@ void HookedPlayLayer::sharedInit(bool skipDelay) {
     if (m_player2CollisionBlock) reinterpret_cast<HookedGameObject*>(m_player2CollisionBlock)->m_fields->m_ignore = true;
     if (m_anticheatSpike)        reinterpret_cast<HookedGameObject*>(m_anticheatSpike)->m_fields->m_ignore = true;
 
-    m_fields->m_overlayLayer = ObjectCollectLayer::create(skipDelay);
+    fields->m_overlayLayer = ObjectCollectLayer::create(skipDelay);
 }
 
 void HookedPlayLayer::potentiallyAddObject(GameObject* object, bool skipTouchChecks) {

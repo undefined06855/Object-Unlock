@@ -14,6 +14,7 @@ void HookedEndLevelLayer::customSetup() {
         auto clipContent = createClip(4.f);
         clipContent->getParent()->setPositionY(187.f);
         clipContent->setScale(1.5f);
+        clipContent->getParent()->setID("top-clip"_spr);
     
         for (auto objectID : playLayerFields->m_objectIDsSeen) {
             auto object = HookedGameObject::createGameObject(objectID);
@@ -36,6 +37,7 @@ void HookedEndLevelLayer::customSetup() {
         auto clipContent = createClip(-4.f);
         clipContent->getParent()->setPositionY(107.f);
         clipContent->setScale(.2f);
+        clipContent->getParent()->setID("bottom-clip"_spr);
     
         for (auto objectID : playLayerFields->m_objectIDsSeen) {
             auto label = cocos2d::CCLabelBMFont::create(ObjectNames::get()->nameForID(objectID).c_str(), "bigFont.fnt");

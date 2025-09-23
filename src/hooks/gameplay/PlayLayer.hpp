@@ -1,6 +1,6 @@
 #pragma once
 #include <Geode/modify/PlayLayer.hpp>
-#include "../ObjectCollectLayer.hpp"
+#include "../../ObjectCollectLayer.hpp"
 
 class $modify(HookedPlayLayer, PlayLayer) {
     struct Fields {
@@ -9,6 +9,7 @@ class $modify(HookedPlayLayer, PlayLayer) {
         std::vector<int> m_objectIDsSeen;
         ObjectCollectLayer* m_overlayLayer;
         bool m_started;
+        bool m_finished;
     };
 
     bool init(GJGameLevel* level, bool useReplay, bool dontCreateObjects);

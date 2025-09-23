@@ -1,5 +1,5 @@
 #include "ObjectCollectLayer.hpp"
-#include "hooks/GameObject.hpp"
+#include "hooks/util/GameObject.hpp"
 
 ObjectCollectLayer* ObjectCollectLayer::create(bool skipDelay) {
     auto ret = new ObjectCollectLayer;
@@ -38,6 +38,7 @@ bool ObjectCollectLayer::init(bool skipDelay) {
 
     m_bg = cocos2d::CCLayerColor::create();
     m_bg->ignoreAnchorPointForPosition(false); // FUCK YOU!!
+    m_bg->setID("bg");
     m_bg->setColor({ 0, 0, 0 });
     m_bg->setOpacity(0);
     m_bg->setSkewX(8.f);
@@ -61,11 +62,13 @@ bool ObjectCollectLayer::init(bool skipDelay) {
     stencil->setContentSize({ clipWidth, clipHeight });
 
     auto clipNode = cocos2d::CCClippingNode::create(stencil);
+    clipNode->setID("clip");
     clipNode->setAnchorPoint({ .5f, .5f });
     clipNode->setContentSize({ clipWidth, clipHeight });
     addChildAtPosition(clipNode, bgAnchor, bgOffset);
 
     m_clipContent = cocos2d::CCNodeRGBA::create();
+    m_clipContent->setID("clip-content");
     m_clipContent->setCascadeOpacityEnabled(true);
     m_clipContent->setLayout(
         geode::RowLayout::create()
