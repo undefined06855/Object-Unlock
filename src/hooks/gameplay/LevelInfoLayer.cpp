@@ -1,9 +1,9 @@
 #include "LevelInfoLayer.hpp"
 #include "../../UnlockManager.hpp"
 
-void HookedLevelInfoLayer::tryCloneLevel(cocos2d::CCObject* sender) {
+void HookedLevelInfoLayer::confirmClone(cocos2d::CCObject* sender) {
     if (!UnlockManager::get().isInRun()) {
-        LevelInfoLayer::tryCloneLevel(sender);
+        LevelInfoLayer::confirmClone(sender);
         return;
     }
 

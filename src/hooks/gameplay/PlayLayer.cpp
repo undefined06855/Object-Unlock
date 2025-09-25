@@ -1,10 +1,10 @@
 #include "PlayLayer.hpp"
-#include "GameObject.hpp"
+#include "../util/GameObject.hpp"
 #include "../../UnlockManager.hpp"
 
 HookedPlayLayer::Fields::Fields()
     : m_objectIDsSeen({})
-    , m_overlayLayer(nullptr)
+    , m_overlayLayer(ObjectCollectLayer::create(false))
     , m_started(false)
     , m_finished(false) {}
 
@@ -102,7 +102,10 @@ void HookedPlayLayer::sharedInit(bool skipDelay) {
     if (m_player2CollisionBlock) reinterpret_cast<HookedGameObject*>(m_player2CollisionBlock)->m_fields->m_ignore = true;
     if (m_anticheatSpike)        reinterpret_cast<HookedGameObject*>(m_anticheatSpike)->m_fields->m_ignore = true;
 
-    fields->m_overlayLayer = ObjectCollectLayer::create(skipDelay);
+    // objectcollectlayer not made from pre init hook, create here
+    if (skipDelay) {
+        fields->m_overlayLayer = ObjectCollectLayer::create(true);
+    }
 }
 
 void HookedPlayLayer::potentiallyAddObject(GameObject* object, bool skipTouchChecks) {

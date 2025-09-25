@@ -8,15 +8,15 @@ void HookedGameManager::returnToLastScene(GJGameLevel* level) {
         // so pressing back on resultslayer goes to your levels
 
         auto director = cocos2d::CCDirector::get();
-        director->popToSceneStackLevel(1); // remove all except last scene
 
-        // clean up this current last scene
-        auto lastScene = static_cast<cocos2d::CCScene*>(director->m_pobScenesStack->lastObject());
-        if (lastScene->isRunning()) {
-            lastScene->onExitTransitionDidStart();
-            lastScene->onExit();
+        // retain and keep this current scene
+        director->m_pRunningScene->retain();
+
+        for (auto scene : geode::cocos::CCArrayExt<cocos2d::CCScene*>(director->m_pobScenesStack)) {
+            if (scene->isRunning()) continue;
+            scene->cleanup();
         }
-        lastScene->cleanup();
+
         director->m_pobScenesStack->removeAllObjects();
 
         // and add our scenes

@@ -61,6 +61,7 @@ bool ResultsLayer::init() {
         auto node = cocos2d::CCNode::create();
 
         auto object = HookedGameObject::createGameObject(objectID);
+        if (!object) continue;
         
         // keep object at max 1u by 1u size
         if (object->getContentWidth() > object->getContentHeight()) {

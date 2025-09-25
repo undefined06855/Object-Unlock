@@ -24,25 +24,24 @@ bool AnimatingLock::init() {
 void AnimatingLock::onEnterTransitionDidFinish() {
     CCSprite::onEnterTransitionDidFinish();
 
+    auto worldPos = getParent()->convertToWorldSpace(getPosition());
+    auto delay = worldPos.x / 300.f - worldPos.y / 170.f;
+    auto endingRotation = (std::rand() / (float)RAND_MAX) * 10.f - 5.f;
+
     auto parent = static_cast<CreateMenuItem*>(getParent());
     if (parent->m_pageIndex != 0 || parent->m_tabIndex != 0) {
         setOpacity(255);
         setScale(1.f);
-        setRotation(0.f);
+        setRotation(endingRotation);
         return;
     }
-
-    auto worldPos = getParent()->convertToWorldSpace(getPosition());
-    auto delay = worldPos.x / 200.f - worldPos.y / 100.f;
-
-    auto endingRotation = (std::rand() / (float)RAND_MAX) * 10.f - 5.f;
 
     runAction(cocos2d::CCSequence::createWithTwoActions(
         cocos2d::CCDelayTime::create(delay),
         cocos2d::CCSpawn::create(
             cocos2d::CCFadeIn::create(.3f),
-            cocos2d::CCEaseSineIn::create(cocos2d::CCRotateTo::create(.5f, endingRotation)),
-            cocos2d::CCEaseSineIn::create(cocos2d::CCScaleTo::create(.5f, 1.f)),
+            cocos2d::CCEaseSineIn::create(cocos2d::CCRotateTo::create(.3f, endingRotation)),
+            cocos2d::CCEaseSineIn::create(cocos2d::CCScaleTo::create(.3f, 1.f)),
             nullptr
         )
     ));

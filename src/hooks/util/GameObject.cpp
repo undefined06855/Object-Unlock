@@ -106,5 +106,7 @@ GameObject* HookedGameObject::createGameObject(int id) {
     object->setPosition({ 0.f, 0.f });
     object->setAnchorPoint({ 0.f, 0.f });
 
+    object->setTag(id); // for further debugging later
+
     return object;
 }

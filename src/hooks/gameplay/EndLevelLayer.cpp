@@ -1,10 +1,13 @@
 #include "EndLevelLayer.hpp"
 #include "PlayLayer.hpp"
-#include "GameObject.hpp"
+#include "../util/GameObject.hpp"
+#include "../../UnlockManager.hpp"
 #include <alphalaneous.object_popup_api/include/ObjectNames.hpp>
 
 void HookedEndLevelLayer::customSetup() {
     EndLevelLayer::customSetup();
+
+    if (!UnlockManager::get().isInRun()) return;
 
     auto playLayer = static_cast<HookedPlayLayer*>(m_playLayer);
     auto playLayerFields = playLayer->m_fields.self();
@@ -23,7 +26,7 @@ void HookedEndLevelLayer::customSetup() {
             if (object->getContentHeight() > 60.f) {
                 object->setScale(60.f / object->getContentHeight());
             }
-    
+
             clipContent->addChild(object);
         }
     
